@@ -1,0 +1,453 @@
+:root {
+  /* Primary neutral palette (simplified from Figma) */
+  --color-primary-900: #0a196f;
+  --color-primary-800: #102587;
+  --color-primary-700: #1a37a7;
+  --color-primary-600: #264bc8;
+  --color-primary-500: #3563e9; /* main blue */
+  --color-primary-400: #658df1;
+  --color-primary-300: #85a8f8;
+  --color-primary-200: #aec8fc;
+  --color-primary-100: #dbe4fd;
+  --color-white: #ffffff;
+
+  /* Background / surface */
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-border: #e0e4ee;
+  --color-text-main: #1a202c;
+  --color-text-muted: #6b7280;
+
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+
+  --shadow-soft: 0 24px 80px rgba(15, 23, 42, 0.12);
+
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  --container-width: 1120px;
+}
+
+/* Reset-ish */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-main);
+  color: var(--color-text-main);
+  background-color: var(--color-bg);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Layout */
+.app {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+.main {
+  padding: 1.5rem 1rem 3rem;
+}
+
+@media (min-width: 1024px) {
+  .main {
+    padding: 2rem 0 4rem;
+  }
+}
+
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Header */
+.header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.header__logo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-primary-500);
+}
+
+.header__nav {
+  display: none;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.header__nav-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.header__nav-link--active {
+  color: var(--color-primary-500);
+  font-weight: 600;
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header__login-btn {
+  padding: 0.55rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--color-primary-500);
+  color: var(--color-white);
+}
+
+/* Simple mobile menu icon placeholder */
+.header__menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+/* Desktop header nav */
+@media (min-width: 768px) {
+  .header__nav {
+    display: flex;
+  }
+
+  .header__menu-btn {
+    display: none;
+  }
+}
+
+/* Hero section */
+.home-hero {
+  margin-top: 1.5rem;
+}
+
+.home-hero__content {
+  background: radial-gradient(
+    circle at top left,
+    #4f7dfa 0,
+    #3563e9 40%,
+    #264bc8 100%
+  );
+  color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.home-hero__content h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.home-hero__content p {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.home-hero__button {
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background-color: var(--color-white);
+  color: var(--color-primary-600);
+}
+
+/* Home cars grid */
+.home-cars {
+  margin-top: 2rem;
+}
+
+.home-cars__header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+}
+
+.home-cars__header p {
+  margin: 0 0 1.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.home-cars__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .home-cars__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-cars__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Car card */
+.car-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.car-card__top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.car-card__title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.car-card__title span {
+  font-weight: 500;
+}
+
+.car-card__type {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.car-card__image-wrapper {
+  width: 100%;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.car-card__image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.car-card__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.car-card__spec {
+  background-color: var(--color-bg);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+}
+
+.car-card__bottom {
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.car-card__price-main {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.car-card__price-sub {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.car-card__button {
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: var(--color-primary-500);
+  color: var(--color-white);
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+/* Booking search panel (pickup / drop-off card) */
+.search-bar {
+  margin-top: 1rem;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-bar__card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.search-bar__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-bar__section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.search-bar__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.search-bar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.search-bar__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.search-bar__input {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  background-color: #f8fafc;
+  color: var(--color-text-main);
+}
+
+.search-bar__input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 1px rgba(53, 99, 233, 0.25);
+}
+
+/* Swap button */
+.search-bar__swap-btn {
+  align-self: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  margin: -0.3rem 0;
+  background-color: var(--color-primary-500);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  font-size: 1.1rem;
+}
+
+/* Responsive layout for larger screens */
+@media (min-width: 768px) {
+  .search-bar {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .search-bar__fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .search-bar__swap-btn {
+    margin: 0 0.75rem;
+  }
+}
+
+/* -------------------------------------- */
+/* Simple top search: "Search something here" */
+/* Used by our <SearchBar /> component     */
+/* -------------------------------------- */
+
+.top-search {
+  margin: 1.5rem 0 1.75rem;
+}
+
+.top-search__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--color-surface);
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  padding: 0.65rem 1.1rem;
+}
+
+.top-search__icon {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
+.top-search__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  background: transparent;
+  color: var(--color-text-main);
+}
+
+.top-search__input::placeholder {
+  color: var(--color-text-muted);
+}
