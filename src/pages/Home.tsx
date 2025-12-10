@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Vehicle } from "../types/vehicle";
 import { CarCard } from "../components/CarCard";
+import { RentalPanel } from "../components/RentalPanel";
 
 type HomePageProps = {
   searchTerm: string;
@@ -78,9 +79,12 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
           {/* Left card */}
           <article className="hero-card hero-card--primary">
             <div className="hero-card__content">
-              <h1 className="hero-card__title">The Best Platform for Car Rental</h1>
+              <h1 className="hero-card__title">
+                The Best Platform for Car Rental
+              </h1>
               <p className="hero-card__subtitle">
-                Ease of doing a car rental safely and reliably. Of course at a low price.
+                Ease of doing a car rental safely and reliably. Of course at a
+                low price.
               </p>
               <button className="hero-card__button">Rental Car</button>
             </div>
@@ -98,7 +102,8 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
                 Easy way to rent a car at a low price
               </h2>
               <p className="hero-card__subtitle">
-                Providing cheap car rental services and safe and comfortable facilities.
+                Providing cheap car rental services and safe and comfortable
+                facilities.
               </p>
               <button className="hero-card__button hero-card__button--outline">
                 Rental Car
@@ -112,6 +117,9 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
           </article>
         </div>
       </section>
+
+      {/* Rental search panel (Pickup / Drop-Off) */}
+      <RentalPanel />
 
       {/* Cars list */}
       <section className="home-cars">
