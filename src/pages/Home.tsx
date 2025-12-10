@@ -8,6 +8,10 @@ type HomePageProps = {
   searchTerm: string;
 };
 
+// image URLs from public/hero
+const HERO_CAR_1 = `${import.meta.env.BASE_URL}hero/hero-car-1.png`;
+const HERO_CAR_2 = `${import.meta.env.BASE_URL}hero/hero-car-2.png`;
+
 const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,28 +71,71 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
   }
 
   return (
-    <section className="home-cars">
-      <div className="home-cars__header">
-        <div>
-          <h1>Available Cars</h1>
-          <p>{filteredVehicles.length} car(s) found</p>
+    <>
+      {/* Hero section */}
+      <section className="hero">
+        <div className="hero__grid">
+          {/* Left card */}
+          <article className="hero-card hero-card--primary">
+            <div className="hero-card__content">
+              <h1 className="hero-card__title">The Best Platform for Car Rental</h1>
+              <p className="hero-card__subtitle">
+                Ease of doing a car rental safely and reliably. Of course at a low price.
+              </p>
+              <button className="hero-card__button">Rental Car</button>
+            </div>
+            <img
+              src={HERO_CAR_2}
+              alt="Sports car"
+              className="hero-card__image"
+            />
+          </article>
+
+          {/* Right card */}
+          <article className="hero-card hero-card--secondary">
+            <div className="hero-card__content">
+              <h2 className="hero-card__title">
+                Easy way to rent a car at a low price
+              </h2>
+              <p className="hero-card__subtitle">
+                Providing cheap car rental services and safe and comfortable facilities.
+              </p>
+              <button className="hero-card__button hero-card__button--outline">
+                Rental Car
+              </button>
+            </div>
+            <img
+              src={HERO_CAR_1}
+              alt="Silver sports car"
+              className="hero-card__image hero-card__image--right"
+            />
+          </article>
         </div>
-      </div>
+      </section>
 
-      <div className="home-cars__grid">
-        {filteredVehicles.map((car) => (
-          <CarCard key={car.id} car={car} />
-        ))}
-
-        {filteredVehicles.length === 0 && (
-          <div className="home-cars__empty">
-            No cars found for “{searchTerm}”.
+      {/* Cars list */}
+      <section className="home-cars">
+        <div className="home-cars__header">
+          <div>
+            <h1>Available Cars</h1>
+            <p>{filteredVehicles.length} car(s) found</p>
           </div>
-        )}
-      </div>
-    </section>
+        </div>
+
+        <div className="home-cars__grid">
+          {filteredVehicles.map((car) => (
+            <CarCard key={car.id} car={car} />
+          ))}
+
+          {filteredVehicles.length === 0 && (
+            <div className="home-cars__empty">
+              No cars found for “{searchTerm}”.
+            </div>
+          )}
+        </div>
+      </section>
+    </>
   );
 };
 
 export default HomePage;
-
