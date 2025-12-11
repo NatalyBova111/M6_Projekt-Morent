@@ -4,6 +4,8 @@ import { supabase } from "../lib/supabase";
 import type { Vehicle } from "../types/vehicle";
 import { CarCard } from "../components/CarCard";
 import { RentalPanel } from "../components/RentalPanel";
+import { useNavigate } from "react-router-dom";
+
 
 type HomePageProps = {
   searchTerm: string;
@@ -17,6 +19,13 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+
+  const handleFilterClick = () => {
+    console.log("Filter button clicked");
+    navigate("/filter"); 
+  };
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -118,6 +127,13 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
         </div>
       </section>
 
+      {/* Filter button */}
+<div className="filter-button-wrapper">
+  <button className="filter-button" onClick={handleFilterClick}>
+    <img src="/hero/setting-4.png" alt="Filter icon" className="filter-icon" />
+    <span>Filter</span>
+  </button>
+</div>
       {/* Rental search panel (Pickup / Drop-Off) */}
       <RentalPanel />
 

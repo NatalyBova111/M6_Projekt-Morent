@@ -1,3 +1,5 @@
+// src/components/CarCard.tsx
+import { useNavigate } from "react-router-dom";   
 import type { Vehicle } from "../types/vehicle";
 
 type Props = {
@@ -5,6 +7,12 @@ type Props = {
 };
 
 export function CarCard({ car }: Props) {
+  const navigate = useNavigate();                 
+
+  const handleRentNow = () => {
+    navigate(`/cars/${car.id}`);                  
+  };
+
   return (
     <article className="car-card">
       <div className="car-card__top">
@@ -35,7 +43,9 @@ export function CarCard({ car }: Props) {
           <span className="car-card__price-main">${car.priceperday}</span>
           <span className="car-card__price-sub">/ day</span>
         </div>
-        <button className="car-card__button">Rent now</button>
+        <button className="car-card__button" onClick={handleRentNow}>
+          Rent now
+        </button>
       </div>
     </article>
   );
