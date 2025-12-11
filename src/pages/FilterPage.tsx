@@ -1,4 +1,3 @@
-// src/pages/FilterPage.tsx
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Vehicle } from "../types/vehicle";
@@ -6,18 +5,28 @@ import { CarCard } from "../components/CarCard";
 import { FilterSidebar } from "../components/FilterSidebar";
 import { RentalPanel } from "../components/RentalPanel";
 
-type FilterPageProps = {
-  searchTerm: string;
+type FilterValues = {
+  types: string[];
+  capacity: string[];
+  maxPrice: number;
 };
 
-const FilterPage: React.FC<FilterPageProps> = ({ searchTerm }) => {
+const FilterPage: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 🔥 новое состояние фильтров
+  const [filters, setFilters] = useState<FilterValues>({
+    types: [],
+    capacity: [],
+    maxPrice: 100,
+  });
+
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true);
+
       const { data, error } = await supabase
         .from("vehicles")
         .select("*")
@@ -36,54 +45,77 @@ const FilterPage: React.FC<FilterPageProps> = ({ searchTerm }) => {
     fetchVehicles();
   }, []);
 
+  // -------------------------------------
+  // 🔍 ЛОГИКА ФИЛЬТРАЦИИ
+  // -------------------------------------
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
-  const filteredVehicles = normalizedSearch
-    ? vehicles.filter((v) => {
-        const brand = v.brand?.toLowerCase() ?? "";
-        const model = v.model?.toLowerCase() ?? "";
-        const vehicleType = v.vehicletype?.toLowerCase() ?? "";
+  const filtered = vehicles.filter((v) => {
+    const brand = v.brand?.toLowerCase() ?? "";
+    const model = v.model?.toLowerCase() ?? "";
+    const type = v.vehicletype?.toLowerCase() ?? "";
 
-        return (
-          brand.includes(normalizedSearch) ||
-          model.includes(normalizedSearch) ||
-          vehicleType.includes(normalizedSearch)
-        );
-      })
-    : vehicles;
+    // поиск
+    if (
+      normalizedSearch &&
+      !brand.includes(normalizedSearch) &&
+      !model.includes(normalizedSearch) &&
+      !type.includes(normalizedSearch)
+    ) {
+      return false;
+    }
+
+    // фильтр: тип
+    if (filters.types.length > 0 && !filters.types.includes(v.vehicletype)) {
+      return false;
+    }
+
+    // фильтр: вместимость
+    if (
+      filters.capacity.length > 0 &&
+      !filters.capacity.includes(v.seats?.toString() ?? "")
+    ) {
+      return false;
+    }
+
+    // фильтр: цена
+    if (v.priceperday > filters.maxPrice) {
+      return false;
+    }
+
+    return true;
+  });
 
   return (
     <div className="filter-page">
       <div className="container">
         <div className="filter-page__layout">
-          <aside className="filter-page__sidebar">
-            <FilterSidebar />
-          </aside>
 
+          {/* LEFT SIDEBAR */}
+          <FilterSidebar filters={filters} setFilters={setFilters} />
+
+          {/* CONTENT AREA */}
           <section className="filter-page__content">
             <RentalPanel />
 
             <section className="home-cars home-cars--filter">
               <div className="home-cars__header">
-                <div>
-                  <h1>Available Cars</h1>
-                  <p>{filteredVehicles.length} car(s) found</p>
-                </div>
+                <h1>Available Cars</h1>
+                <p>{filtered.length} car(s) found</p>
               </div>
 
               {loading && <p>Loading cars...</p>}
               {error && <p className="error">Failed to load cars: {error}</p>}
 
-              {!loading && !error && (
+              {!loading && (
                 <div className="home-cars__grid home-cars__grid--3">
-                  
-                  {filteredVehicles.map((car) => (
+                  {filtered.map((car) => (
                     <CarCard key={car.id} car={car} />
                   ))}
 
-                  {filteredVehicles.length === 0 && (
+                  {filtered.length === 0 && (
                     <div className="home-cars__empty">
-                      No cars found for “{searchTerm}”.
+                      No cars found.
                     </div>
                   )}
                 </div>
@@ -97,4 +129,3 @@ const FilterPage: React.FC<FilterPageProps> = ({ searchTerm }) => {
 };
 
 export default FilterPage;
-
