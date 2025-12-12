@@ -16,7 +16,7 @@ const FilterPage: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔥 новое состояние фильтров
+  // FILTER STATE
   const [filters, setFilters] = useState<FilterValues>({
     types: [],
     capacity: [],
@@ -46,7 +46,7 @@ const FilterPage: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
   }, []);
 
   // -------------------------------------
-  // 🔍 ЛОГИКА ФИЛЬТРАЦИИ
+  // SEARCH FILTER
   // -------------------------------------
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -55,7 +55,7 @@ const FilterPage: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
     const model = v.model?.toLowerCase() ?? "";
     const type = v.vehicletype?.toLowerCase() ?? "";
 
-    // поиск
+    // search filter
     if (
       normalizedSearch &&
       !brand.includes(normalizedSearch) &&
@@ -65,12 +65,12 @@ const FilterPage: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
       return false;
     }
 
-    // фильтр: тип
+    // filter type
     if (filters.types.length > 0 && !filters.types.includes(v.vehicletype)) {
       return false;
     }
 
-    // фильтр: вместимость
+    // filter capacity
     if (
       filters.capacity.length > 0 &&
       !filters.capacity.includes(v.seats?.toString() ?? "")
@@ -78,7 +78,7 @@ const FilterPage: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
       return false;
     }
 
-    // фильтр: цена
+    // filter price
     if (v.priceperday > filters.maxPrice) {
       return false;
     }

@@ -154,7 +154,6 @@ const CarDetailPage: React.FC = () => {
             </span>
           </div>
 
-          {/* 🔥 вот здесь добавили переход на checkout */}
           <button
             className="detail__side-button"
             type="button"
