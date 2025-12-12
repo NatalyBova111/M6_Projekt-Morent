@@ -16,7 +16,9 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--color-primary-500);
+   text-decoration: none;   /* убираем подчеркивание */
 }
+
 
 .header__nav {
   display: none;

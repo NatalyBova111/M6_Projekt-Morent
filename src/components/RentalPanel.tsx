@@ -1,7 +1,10 @@
 // src/components/RentalPanel.tsx
 import React from "react";
+import { useBooking } from "../context/BookingContext";
 
 export const RentalPanel: React.FC = () => {
+  const { pickup, dropoff, setPickup, setDropoff, swap } = useBooking();
+
   return (
     <section className="rental-panel">
       <div className="rental-panel__grid container">
@@ -13,31 +16,46 @@ export const RentalPanel: React.FC = () => {
           </header>
 
           <div className="rental-card__fields">
+            {/* Location */}
             <div className="rental-card__field">
               <label className="rental-card__label">Location</label>
-              <select className="rental-card__input">
-                <option>Please select</option>
-                <option>Bremen</option>
-                <option>Hamburg</option>
-                <option>Berlin</option>
+              <select
+                className="rental-card__input"
+                value={pickup.location}
+                onChange={(e) =>
+                  setPickup((prev) => ({ ...prev, location: e.target.value }))
+                }
+              >
+                <option value="">Please select</option>
+                <option value="Bremen">Bremen</option>
+                <option value="Hamburg">Hamburg</option>
+                <option value="Berlin">Berlin</option>
               </select>
             </div>
 
+            {/* Date */}
             <div className="rental-card__field">
               <label className="rental-card__label">Date</label>
               <input
-                type="text"
-                placeholder="tt.mm.jjjj"
+                type="date"
                 className="rental-card__input"
+                value={pickup.date}
+                onChange={(e) =>
+                  setPickup((prev) => ({ ...prev, date: e.target.value }))
+                }
               />
             </div>
 
+            {/* Time */}
             <div className="rental-card__field">
               <label className="rental-card__label">Time</label>
               <input
-                type="text"
-                placeholder="--:--"
+                type="time"
                 className="rental-card__input"
+                value={pickup.time}
+                onChange={(e) =>
+                  setPickup((prev) => ({ ...prev, time: e.target.value }))
+                }
               />
             </div>
           </div>
@@ -45,7 +63,11 @@ export const RentalPanel: React.FC = () => {
 
         {/* Middle swap button */}
         <div className="rental-panel__swap-wrapper">
-          <button className="rental-panel__swap-btn" type="button">
+          <button
+            className="rental-panel__swap-btn"
+            type="button"
+            onClick={swap}
+          >
             ⇅
           </button>
         </div>
@@ -58,31 +80,46 @@ export const RentalPanel: React.FC = () => {
           </header>
 
           <div className="rental-card__fields">
+            {/* Location */}
             <div className="rental-card__field">
               <label className="rental-card__label">Location</label>
-              <select className="rental-card__input">
-                <option>Please select</option>
-                <option>Bremen</option>
-                <option>Hamburg</option>
-                <option>Berlin</option>
+              <select
+                className="rental-card__input"
+                value={dropoff.location}
+                onChange={(e) =>
+                  setDropoff((prev) => ({ ...prev, location: e.target.value }))
+                }
+              >
+                <option value="">Please select</option>
+                <option value="Bremen">Bremen</option>
+                <option value="Hamburg">Hamburg</option>
+                <option value="Berlin">Berlin</option>
               </select>
             </div>
 
+            {/* Date */}
             <div className="rental-card__field">
               <label className="rental-card__label">Date</label>
               <input
-                type="text"
-                placeholder="tt.mm.jjjj"
+                type="date"
                 className="rental-card__input"
+                value={dropoff.date}
+                onChange={(e) =>
+                  setDropoff((prev) => ({ ...prev, date: e.target.value }))
+                }
               />
             </div>
 
+            {/* Time */}
             <div className="rental-card__field">
               <label className="rental-card__label">Time</label>
               <input
-                type="text"
-                placeholder="--:--"
+                type="time"
                 className="rental-card__input"
+                value={dropoff.time}
+                onChange={(e) =>
+                  setDropoff((prev) => ({ ...prev, time: e.target.value }))
+                }
               />
             </div>
           </div>

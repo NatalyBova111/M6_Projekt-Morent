@@ -7,6 +7,8 @@ import { Footer } from "./components/Footer";
 import HomePage from "./pages/Home";
 import FilterPage from "./pages/FilterPage";
 import CarDetailPage from "./pages/CarDetail";   
+import CheckoutPage from "./pages/CheckoutPage";
+
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +23,7 @@ function App() {
             <Route path="/" element={<HomePage searchTerm={searchTerm} />} />
             <Route path="/filter" element={<FilterPage searchTerm={searchTerm} />} />
             <Route path="/cars/:id" element={<CarDetailPage />} />   
+            <Route path="/checkout/:id" element={<CheckoutPage />} />
           </Routes>
         </div>
       </main>

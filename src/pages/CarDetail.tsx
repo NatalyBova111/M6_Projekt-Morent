@@ -1,4 +1,3 @@
-// src/pages/CarDetail.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -13,7 +12,6 @@ const CarDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    
     if (!id) {
       return;
     }
@@ -156,7 +154,14 @@ const CarDetailPage: React.FC = () => {
             </span>
           </div>
 
-          <button className="detail__side-button">Rent Now</button>
+          {/* 🔥 вот здесь добавили переход на checkout */}
+          <button
+            className="detail__side-button"
+            type="button"
+            onClick={() => navigate(`/checkout/${vehicle.id}`)}
+          >
+            Rent Now
+          </button>
         </aside>
       </div>
     </section>
