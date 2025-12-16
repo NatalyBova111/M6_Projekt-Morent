@@ -1,0 +1,27 @@
+.my-bookings__title { margin: 24px 0 16px; }
+.my-bookings__grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .my-bookings__grid { grid-template-columns: 1fr 1fr; } }
+
+.my-bookings__card {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.my-bookings__car { display: flex; align-items: center; gap: 12px; }
+.my-bookings__img { width: 84px; height: 56px; object-fit: contain; }
+.my-bookings__img--placeholder { background: #eef2ff; border-radius: 12px; }
+.my-bookings__car-name { font-weight: 700; }
+.my-bookings__car-type { color: var(--color-text-muted); font-size: 13px; }
+.my-bookings__price { margin-left: auto; font-weight: 800; }
+
+.my-bookings__row { display: grid; gap: 12px; margin-top: 12px; }
+@media (min-width: 700px) { .my-bookings__row { grid-template-columns: 1fr 1fr; } }
+.my-bookings__label { font-size: 12px; color: var(--color-text-muted); }
+.my-bookings__value { font-size: 14px; }
+
+.my-bookings__meta {
+  display: flex; justify-content: space-between;
+  margin-top: 12px; font-size: 12px; color: var(--color-text-muted);
+}

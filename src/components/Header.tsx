@@ -14,6 +14,8 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { user, signOut } = useAuth();
 
+  const profileLink = user ? "/my-bookings" : "/login";
+
   return (
     <header className="header">
       <div className="container">
@@ -41,26 +43,24 @@ export const Header: React.FC<HeaderProps> = ({
               />
             </button>
 
-            {user ? (
+            {/* Profile */}
+            <Link to={profileLink} className="header__avatar-btn">
+              <img
+                src="/Profil.png"
+                alt="Profile"
+                className="header__avatar"
+              />
+            </Link>
+
+            {/* Logout (only when logged in) */}
+            {user && (
               <button
-                className="header__avatar-btn"
                 onClick={signOut}
+                className="header__logout-btn"
                 title="Sign out"
               >
-                <img
-                  src="/Profil.png"
-                  alt="Profile"
-                  className="header__avatar"
-                />
+                Logout
               </button>
-            ) : (
-              <Link to="/login" className="header__avatar-btn">
-                <img
-                  src="/Profil.png"
-                  alt="Profile"
-                  className="header__avatar"
-                />
-              </Link>
             )}
           </div>
 
