@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+// src/pages/MyBookingsPage.tsx
+import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/useAuth";
+import { Link } from "react-router-dom";
+
 
 type VehicleShort = {
   id: string;
@@ -22,7 +25,6 @@ type BookingRow = {
   dropoff_time: string;
   total_days: number;
   total_price: number;
-  // Supabase может вернуть объект или массив — обработаем оба варианта
   vehicles: VehicleShort | VehicleShort[] | null;
 };
 
@@ -32,6 +34,27 @@ const MyBookingsPage: React.FC = () => {
   const [items, setItems] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+
+  const handleCancel = async (bookingId: string) => {
+    const ok = window.confirm("Cancel this booking?");
+    if (!ok) return;
+
+    setCancelingId(bookingId);
+    setError(null);
+
+    const { error } = await supabase.from("bookings").delete().eq("id", bookingId);
+
+    if (error) {
+      setError(error.message);
+      setCancelingId(null);
+      return;
+    }
+
+    setItems((prev) => prev.filter((b) => b.id !== bookingId));
+    setCancelingId(null);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -48,25 +71,25 @@ const MyBookingsPage: React.FC = () => {
         .from("bookings")
         .select(
           `
-          id,
-          created_at,
-          pickup_location,
-          pickup_date,
-          pickup_time,
-          dropoff_location,
-          dropoff_date,
-          dropoff_time,
-          total_days,
-          total_price,
-          vehicles (
             id,
-            brand,
-            model,
-            vehicletype,
-            carimg,
-            priceperday
-          )
-        `
+            created_at,
+            pickup_location,
+            pickup_date,
+            pickup_time,
+            dropoff_location,
+            dropoff_date,
+            dropoff_time,
+            total_days,
+            total_price,
+            vehicles (
+              id,
+              brand,
+              model,
+              vehicletype,
+              carimg,
+              priceperday
+            )
+          `
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
@@ -86,8 +109,9 @@ const MyBookingsPage: React.FC = () => {
 
   const normalizedItems = useMemo(() => {
     return items.map((b) => {
-      const car =
-        Array.isArray(b.vehicles) ? b.vehicles[0] ?? null : b.vehicles ?? null;
+      const car = Array.isArray(b.vehicles)
+        ? b.vehicles[0] ?? null
+        : b.vehicles ?? null;
 
       return { booking: b, car };
     });
@@ -97,9 +121,24 @@ const MyBookingsPage: React.FC = () => {
   if (error) return <p className="error">Failed to load bookings: {error}</p>;
 
   return (
-    <section className="my-bookings">
-      <div className="my-bookings__container">
-        <h1 className="my-bookings__title">My Bookings</h1>
+
+
+
+<section className="my-bookings">
+  <div className="my-bookings__container">
+
+    <Link to="/" className="detail__back" style={{ marginBottom: 16 }}>
+      ← Back to Home
+    </Link>
+
+    <h1 className="my-bookings__title">My Bookings</h1>
+
+
+
+
+
+
+
 
         {normalizedItems.length === 0 ? (
           <p className="my-bookings__empty">No bookings yet.</p>
@@ -153,6 +192,18 @@ const MyBookingsPage: React.FC = () => {
                     <span className="my-bookings__value">{b.total_days}</span>
                   </div>
                 </div>
+
+                {/* Actions */}
+                <div className="my-bookings__actions">
+                  <button
+                    type="button"
+                    className="my-bookings__cancel-btn"
+                    onClick={() => handleCancel(b.id)}
+                    disabled={cancelingId === b.id}
+                  >
+                    {cancelingId === b.id ? "Canceling..." : "Cancel booking"}
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -163,3 +214,4 @@ const MyBookingsPage: React.FC = () => {
 };
 
 export default MyBookingsPage;
+

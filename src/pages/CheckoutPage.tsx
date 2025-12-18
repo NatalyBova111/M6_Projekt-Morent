@@ -1,26 +1,31 @@
-// src/pages/CheckoutPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import type { Vehicle } from "../types/vehicle";
 import { useBooking } from "../context/BookingContext";
 import { useAuth } from "../context/useAuth";
 
 function daysBetweenInclusive(start: string, end: string) {
-  // start/end: YYYY-MM-DD
   const s = new Date(start + "T00:00:00");
   const e = new Date(end + "T00:00:00");
   const diff = e.getTime() - s.getTime();
   const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-  return Math.max(1, days); // минимум 1 день
+  return Math.max(1, days);
 }
+
+type PaymentMethod = "card" | "paypal" | "bitcoin";
 
 const CheckoutPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const availableLocations: string[] =
+    (location.state as { availableLocations?: string[] } | null)?.availableLocations ??
+    [];
+
   const { user } = useAuth();
-  const { pickup, dropoff } = useBooking();
+  const { pickup, dropoff, setPickup, setDropoff } = useBooking();
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loadingCar, setLoadingCar] = useState(true);
@@ -29,6 +34,22 @@ const CheckoutPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+
+  // Step 1 — Billing
+  const [billingName, setBillingName] = useState("");
+  const [billingPhone, setBillingPhone] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+
+  // Step 3 — Payment
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExp, setCardExp] = useState(""); // MM/YY
+  const [cardCvc, setCardCvc] = useState("");
+
+  // Step 4 — Confirmation
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeMarketing, setAgreeMarketing] = useState(false);
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -59,7 +80,7 @@ const CheckoutPage: React.FC = () => {
     fetchVehicle();
   }, [id]);
 
-  const bookingReady = useMemo(() => {
+  const rentalReady = useMemo(() => {
     return (
       !!user &&
       !!id &&
@@ -72,6 +93,27 @@ const CheckoutPage: React.FC = () => {
     );
   }, [user, id, pickup, dropoff]);
 
+  const billingReady = useMemo(() => {
+    return (
+      billingName.trim().length > 1 &&
+      billingPhone.trim().length > 4 &&
+      billingAddress.trim().length > 3 &&
+      billingCity.trim().length > 1
+    );
+  }, [billingName, billingPhone, billingAddress, billingCity]);
+
+  const paymentReady = useMemo(() => {
+    if (paymentMethod !== "card") return true;
+    const digits = cardNumber.replace(/\s/g, "");
+    const expOk = /^\d{2}\/\d{2}$/.test(cardExp);
+    const cvcOk = /^\d{3,4}$/.test(cardCvc);
+    return digits.length >= 12 && expOk && cvcOk;
+  }, [paymentMethod, cardNumber, cardExp, cardCvc]);
+
+  const canConfirm = useMemo(() => {
+    return rentalReady && billingReady && paymentReady && agreeTerms && !submitting;
+  }, [rentalReady, billingReady, paymentReady, agreeTerms, submitting]);
+
   const totalDays = useMemo(() => {
     if (!pickup.date || !dropoff.date) return 1;
     return daysBetweenInclusive(pickup.date, dropoff.date);
@@ -81,6 +123,12 @@ const CheckoutPage: React.FC = () => {
     const pricePerDay = Number(vehicle?.priceperday ?? 0);
     return pricePerDay * totalDays;
   }, [vehicle?.priceperday, totalDays]);
+
+  const formatCardNumber = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 19);
+    const parts = digits.match(/.{1,4}/g) ?? [];
+    return parts.join(" ");
+  };
 
   const handleConfirm = async () => {
     setSubmitError(null);
@@ -94,14 +142,24 @@ const CheckoutPage: React.FC = () => {
       setSubmitError("Car not loaded.");
       return;
     }
-    if (!bookingReady) {
+    if (!rentalReady) {
       setSubmitError("Please fill pickup and drop-off details first.");
       return;
     }
-
-    // простая проверка дат: dropoff >= pickup
     if (dropoff.date < pickup.date) {
       setSubmitError("Drop-off date cannot be earlier than pickup date.");
+      return;
+    }
+    if (!billingReady) {
+      setSubmitError("Please fill billing info.");
+      return;
+    }
+    if (!paymentReady) {
+      setSubmitError("Please fill payment details.");
+      return;
+    }
+    if (!agreeTerms) {
+      setSubmitError("Please accept Terms & Conditions.");
       return;
     }
 
@@ -130,8 +188,7 @@ const CheckoutPage: React.FC = () => {
     }
 
     setSubmitSuccess("Booking created successfully!");
-    // дальше можно сделать страницу /bookings, а пока — на главную
-    setTimeout(() => navigate("/", { replace: true }), 700);
+    setTimeout(() => navigate("/my-bookings", { replace: true }), 700);
   };
 
   return (
@@ -139,89 +196,312 @@ const CheckoutPage: React.FC = () => {
       <div className="checkout-page__layout">
         {/* LEFT */}
         <section className="checkout-column">
+          {/* Step 1 — Billing Info */}
+          <article className="checkout-card">
+            <header className="checkout-card__header">
+              <div>
+                <h2 className="checkout-card__title">Billing Info</h2>
+                <p className="checkout-card__subtitle">Please enter your billing info</p>
+              </div>
+              <span className="checkout-card__step">Step 1 of 4</span>
+            </header>
+
+            <div className="checkout-card__grid">
+              <div className="checkout-field">
+                <label className="checkout-field__label">Name</label>
+                <input
+                  className="checkout-field__input"
+                  value={billingName}
+                  onChange={(e) => setBillingName(e.target.value)}
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div className="checkout-field">
+                <label className="checkout-field__label">Phone Number</label>
+                <input
+                  className="checkout-field__input"
+                  value={billingPhone}
+                  onChange={(e) => setBillingPhone(e.target.value)}
+                  placeholder="Phone number"
+                />
+              </div>
+
+              <div className="checkout-field checkout-field--full">
+                <label className="checkout-field__label">Address</label>
+                <input
+                  className="checkout-field__input"
+                  value={billingAddress}
+                  onChange={(e) => setBillingAddress(e.target.value)}
+                  placeholder="Address"
+                />
+              </div>
+
+              <div className="checkout-field">
+                <label className="checkout-field__label">Town / City</label>
+                <input
+                  className="checkout-field__input"
+                  value={billingCity}
+                  onChange={(e) => setBillingCity(e.target.value)}
+                  placeholder="Town or city"
+                />
+              </div>
+            </div>
+          </article>
+
+          {/* Step 2 — Rental Info */}
           <article className="checkout-card">
             <header className="checkout-card__header">
               <div>
                 <h2 className="checkout-card__title">Rental Info</h2>
                 <p className="checkout-card__subtitle">
-                  These values are taken from Pickup/Drop-Off panel
+                  Select pick-up & drop-off from available locations
                 </p>
               </div>
               <span className="checkout-card__step">Step 2 of 4</span>
             </header>
 
-            <div className="checkout-card__subsection">
-              <h3 className="checkout-card__subheading">Pick-Up</h3>
-              <div className="checkout-card__grid">
-                <div className="checkout-field">
-                  <label className="checkout-field__label">Location</label>
-                  <input
-                    className="checkout-field__input"
-                    value={pickup.location || ""}
-                    readOnly
-                  />
-                </div>
-                <div className="checkout-field">
-                  <label className="checkout-field__label">Date</label>
-                  <input
-                    className="checkout-field__input"
-                    value={pickup.date || ""}
-                    readOnly
-                  />
-                </div>
-                <div className="checkout-field">
-                  <label className="checkout-field__label">Time</label>
-                  <input
-                    className="checkout-field__input"
-                    value={pickup.time || ""}
-                    readOnly
-                  />
-                </div>
+            {availableLocations.length === 0 ? (
+              <div style={{ marginTop: 8 }}>
+                <p className="error" style={{ marginBottom: 10 }}>
+                  No available locations were passed to this page.
+                </p>
+                <button
+                  type="button"
+                  className="detail__back"
+                  onClick={() => navigate("/", { replace: true })}
+                >
+                  Go to Home
+                </button>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="checkout-card__subsection">
+                  <h3 className="checkout-card__subheading">Pick-Up</h3>
+                  <div className="checkout-card__grid">
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Location</label>
+                      <select
+                        className="checkout-field__input"
+                        value={pickup.location || ""}
+                        onChange={(e) =>
+                          setPickup((prev) => ({ ...prev, location: e.target.value }))
+                        }
+                      >
+                        <option value="">Select</option>
+                        {availableLocations.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-            <div className="checkout-card__subsection">
-              <h3 className="checkout-card__subheading">Drop-Off</h3>
-              <div className="checkout-card__grid">
-                <div className="checkout-field">
-                  <label className="checkout-field__label">Location</label>
-                  <input
-                    className="checkout-field__input"
-                    value={dropoff.location || ""}
-                    readOnly
-                  />
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Date</label>
+                      <input
+                        className="checkout-field__input"
+                        value={pickup.date || ""}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Time</label>
+                      <input
+                        className="checkout-field__input"
+                        value={pickup.time || ""}
+                        readOnly
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="checkout-field">
-                  <label className="checkout-field__label">Date</label>
-                  <input
-                    className="checkout-field__input"
-                    value={dropoff.date || ""}
-                    readOnly
-                  />
+
+                <div className="checkout-card__subsection">
+                  <h3 className="checkout-card__subheading">Drop-Off</h3>
+                  <div className="checkout-card__grid">
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Location</label>
+                      <select
+                        className="checkout-field__input"
+                        value={dropoff.location || ""}
+                        onChange={(e) =>
+                          setDropoff((prev) => ({ ...prev, location: e.target.value }))
+                        }
+                      >
+                        <option value="">Select</option>
+                        {availableLocations.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Date</label>
+                      <input
+                        className="checkout-field__input"
+                        value={dropoff.date || ""}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Time</label>
+                      <input
+                        className="checkout-field__input"
+                        value={dropoff.time || ""}
+                        readOnly
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="checkout-field">
-                  <label className="checkout-field__label">Time</label>
-                  <input
-                    className="checkout-field__input"
-                    value={dropoff.time || ""}
-                    readOnly
-                  />
-                </div>
+              </>
+            )}
+          </article>
+
+          {/* Step 3 — Payment Method */}
+          <article className="checkout-card">
+            <header className="checkout-card__header">
+              <div>
+                <h2 className="checkout-card__title">Payment Method</h2>
+                <p className="checkout-card__subtitle">Please enter your payment method</p>
               </div>
+              <span className="checkout-card__step">Step 3 of 4</span>
+            </header>
+
+            <div style={{ display: "grid", gap: 12 }}>
+              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === "card"}
+                  onChange={() => setPaymentMethod("card")}
+                />
+                Credit Card
+              </label>
+
+              {paymentMethod === "card" && (
+                <div className="checkout-card__grid">
+                  <div className="checkout-field checkout-field--full">
+                    <label className="checkout-field__label">Card Number</label>
+                    <input
+                      className="checkout-field__input"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                      placeholder="1234 5678 9012 3456"
+                      inputMode="numeric"
+                    />
+                  </div>
+
+                  <div className="checkout-field">
+                    <label className="checkout-field__label">Expiration (MM/YY)</label>
+                    <input
+                      className="checkout-field__input"
+                      value={cardExp}
+                      onChange={(e) => setCardExp(e.target.value.slice(0, 5))}
+                      placeholder="MM/YY"
+                    />
+                  </div>
+
+                  <div className="checkout-field">
+                    <label className="checkout-field__label">CVC</label>
+                    <input
+                      className="checkout-field__input"
+                      value={cardCvc}
+                      onChange={(e) =>
+                        setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))
+                      }
+                      placeholder="123"
+                      inputMode="numeric"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === "paypal"}
+                  onChange={() => setPaymentMethod("paypal")}
+                />
+                PayPal
+              </label>
+
+              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === "bitcoin"}
+                  onChange={() => setPaymentMethod("bitcoin")}
+                />
+                Bitcoin
+              </label>
             </div>
+          </article>
 
-            {submitError && <p className="error">{submitError}</p>}
-            {submitSuccess && <p style={{ color: "#166534" }}>{submitSuccess}</p>}
+          {/* Step 4 — Confirmation */}
+          <article className="checkout-card">
+            <header className="checkout-card__header">
+              <div>
+                <h2 className="checkout-card__title">Confirmation</h2>
+                <p className="checkout-card__subtitle">
+                  Just a few clicks and your rental is ready!
+                </p>
+              </div>
+              <span className="checkout-card__step">Step 4 of 4</span>
+            </header>
 
-            <button
-              className="car-card__button"
-              type="button"
-              onClick={handleConfirm}
-              disabled={!bookingReady || submitting}
-              style={{ marginTop: 12 }}
-            >
-              {submitting ? "Creating booking..." : "Confirm booking"}
-            </button>
+            <div style={{ display: "grid", gap: 12 }}>
+              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <input
+                  type="checkbox"
+                  checked={agreeMarketing}
+                  onChange={(e) => setAgreeMarketing(e.target.checked)}
+                />
+                I agree with sending marketing and newsletter emails. No spam, promised!
+              </label>
+
+              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <input
+                  type="checkbox"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                />
+                I agree with our terms and conditions and privacy policy.
+              </label>
+
+              {submitError && <p className="error">{submitError}</p>}
+              {submitSuccess && <p style={{ color: "#166534" }}>{submitSuccess}</p>}
+
+              {!canConfirm && (
+                <div style={{ fontSize: 14, color: "#6b7280" }}>
+                  <div>To confirm booking please check:</div>
+                  <ul style={{ margin: "6px 0 0 18px" }}>
+                    {!rentalReady && <li>Pickup / Drop-off values</li>}
+                    {!billingReady && <li>Billing info</li>}
+                    {!paymentReady && <li>Payment details</li>}
+                    {!agreeTerms && <li>Accept Terms & Conditions</li>}
+                  </ul>
+                </div>
+              )}
+
+              <button
+                className="car-card__button"
+                type="button"
+                onClick={handleConfirm}
+                disabled={!canConfirm}
+                style={{
+                  marginTop: 8,
+                  opacity: canConfirm ? 1 : 0.5,
+                  cursor: canConfirm ? "pointer" : "not-allowed",
+                }}
+              >
+                {submitting ? "Creating booking..." : "Confirm booking"}
+              </button>
+            </div>
           </article>
         </section>
 
@@ -245,12 +525,8 @@ const CheckoutPage: React.FC = () => {
                     <h3 className="checkout-summary__car-name">
                       {vehicle.brand} {vehicle.model}
                     </h3>
-                    <p className="checkout-summary__car-type">
-                      {vehicle.vehicletype}
-                    </p>
-                    <p style={{ margin: 0, color: "#6b7280" }}>
-                      {totalDays} day(s)
-                    </p>
+                    <p className="checkout-summary__car-type">{vehicle.vehicletype}</p>
+                    <p style={{ margin: 0, color: "#6b7280" }}>{totalDays} day(s)</p>
                   </div>
                 </div>
 

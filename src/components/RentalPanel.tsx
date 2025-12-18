@@ -1,9 +1,36 @@
 // src/components/RentalPanel.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useBooking } from "../context/BookingContext";
+import { supabase } from "../lib/supabase";
 
 export const RentalPanel: React.FC = () => {
   const { pickup, dropoff, setPickup, setDropoff, swap } = useBooking();
+
+  const [locations, setLocations] = useState<string[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(true);
+
+  // load locations from Supabase
+  useEffect(() => {
+    const loadLocations = async () => {
+      setLoadingLocations(true);
+
+      const { data, error } = await supabase
+        .from("locations")
+        .select("locations")
+        .limit(1)
+        .single();
+
+      if (!error && data?.locations && Array.isArray(data.locations)) {
+        setLocations(data.locations);
+      } else {
+        console.error("Failed to load locations", error);
+      }
+
+      setLoadingLocations(false);
+    };
+
+    loadLocations();
+  }, []);
 
   return (
     <section className="rental-panel">
@@ -12,7 +39,6 @@ export const RentalPanel: React.FC = () => {
         <article className="rental-card">
           <header className="rental-card__header">
             <h3 className="rental-card__title">Pickup</h3>
-            <span className="rental-card__step">Step 1 of 4</span>
           </header>
 
           <div className="rental-card__fields">
@@ -22,14 +48,20 @@ export const RentalPanel: React.FC = () => {
               <select
                 className="rental-card__input"
                 value={pickup.location}
+                disabled={loadingLocations}
                 onChange={(e) =>
-                  setPickup((prev) => ({ ...prev, location: e.target.value }))
+                  setPickup((prev) => ({
+                    ...prev,
+                    location: e.target.value,
+                  }))
                 }
               >
                 <option value="">Please select</option>
-                <option value="Bremen">Bremen</option>
-                <option value="Hamburg">Hamburg</option>
-                <option value="Berlin">Berlin</option>
+                {locations.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -41,7 +73,10 @@ export const RentalPanel: React.FC = () => {
                 className="rental-card__input"
                 value={pickup.date}
                 onChange={(e) =>
-                  setPickup((prev) => ({ ...prev, date: e.target.value }))
+                  setPickup((prev) => ({
+                    ...prev,
+                    date: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -54,14 +89,17 @@ export const RentalPanel: React.FC = () => {
                 className="rental-card__input"
                 value={pickup.time}
                 onChange={(e) =>
-                  setPickup((prev) => ({ ...prev, time: e.target.value }))
+                  setPickup((prev) => ({
+                    ...prev,
+                    time: e.target.value,
+                  }))
                 }
               />
             </div>
           </div>
         </article>
 
-        {/* Middle swap button */}
+        {/* Swap button */}
         <div className="rental-panel__swap-wrapper">
           <button
             className="rental-panel__swap-btn"
@@ -76,7 +114,6 @@ export const RentalPanel: React.FC = () => {
         <article className="rental-card">
           <header className="rental-card__header">
             <h3 className="rental-card__title">Drop-Off</h3>
-            <span className="rental-card__step">Step 2 of 4</span>
           </header>
 
           <div className="rental-card__fields">
@@ -86,14 +123,20 @@ export const RentalPanel: React.FC = () => {
               <select
                 className="rental-card__input"
                 value={dropoff.location}
+                disabled={loadingLocations}
                 onChange={(e) =>
-                  setDropoff((prev) => ({ ...prev, location: e.target.value }))
+                  setDropoff((prev) => ({
+                    ...prev,
+                    location: e.target.value,
+                  }))
                 }
               >
                 <option value="">Please select</option>
-                <option value="Bremen">Bremen</option>
-                <option value="Hamburg">Hamburg</option>
-                <option value="Berlin">Berlin</option>
+                {locations.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -105,7 +148,10 @@ export const RentalPanel: React.FC = () => {
                 className="rental-card__input"
                 value={dropoff.date}
                 onChange={(e) =>
-                  setDropoff((prev) => ({ ...prev, date: e.target.value }))
+                  setDropoff((prev) => ({
+                    ...prev,
+                    date: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -118,7 +164,10 @@ export const RentalPanel: React.FC = () => {
                 className="rental-card__input"
                 value={dropoff.time}
                 onChange={(e) =>
-                  setDropoff((prev) => ({ ...prev, time: e.target.value }))
+                  setDropoff((prev) => ({
+                    ...prev,
+                    time: e.target.value,
+                  }))
                 }
               />
             </div>

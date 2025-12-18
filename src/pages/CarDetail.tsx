@@ -1,9 +1,39 @@
-import { useEffect, useState } from "react";
+// src/pages/CarDetail.tsx
+import { useEffect, useMemo, useState } from "react";
+import type { FC } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import type { Vehicle } from "../types/vehicle";
 
-const CarDetailPage: React.FC = () => {
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Fix Leaflet default marker icons (so marker is visible)
+type LeafletIconProto = { _getIconUrl?: unknown };
+delete (L.Icon.Default.prototype as LeafletIconProto)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+// city → coordinates dictionary
+const CITY_COORDS: Record<string, [number, number]> = {
+  Berlin: [52.52, 13.405],
+  Hamburg: [53.5511, 9.9937],
+  Bremen: [53.0793, 8.8017],
+
+  Munich: [48.1351, 11.5820],
+  Frankfurt: [50.1109, 8.6821],
+  Dusseldorf: [51.2277, 6.7735],
+};
+
+
+const FALLBACK_CENTER: [number, number] = [51.1657, 10.4515]; // Germany center
+
+const CarDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -12,9 +42,7 @@ const CarDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
-      return;
-    }
+    if (!id) return;
 
     const fetchVehicle = async () => {
       setLoading(true);
@@ -39,6 +67,24 @@ const CarDetailPage: React.FC = () => {
     fetchVehicle();
   }, [id]);
 
+  // locations 
+  const locationNames = useMemo<string[]>(() => {
+    return (vehicle?.locations ?? []).map((n) => n.trim()).filter(Boolean);
+  }, [vehicle]);
+
+  const markers = useMemo<{ name: string; coords: [number, number] }[]>(() => {
+    return locationNames
+      .map((name) => {
+        const coords = CITY_COORDS[name];
+        return coords ? { name, coords } : null;
+      })
+      .filter((m): m is { name: string; coords: [number, number] } => m !== null);
+  }, [locationNames]);
+
+  const mapCenter = useMemo<[number, number]>(() => {
+    return markers[0]?.coords ?? FALLBACK_CENTER;
+  }, [markers]);
+
   if (!id) {
     return (
       <div className="detail">
@@ -50,9 +96,7 @@ const CarDetailPage: React.FC = () => {
     );
   }
 
-  if (loading) {
-    return <p>Loading car...</p>;
-  }
+  if (loading) return <p>Loading car...</p>;
 
   if (error || !vehicle) {
     return (
@@ -72,7 +116,7 @@ const CarDetailPage: React.FC = () => {
       </button>
 
       <div className="detail__layout">
-        {/* Left main card */}
+        {/* LEFT */}
         <article className="detail__main-card">
           <div className="detail__title-row">
             <div>
@@ -109,58 +153,74 @@ const CarDetailPage: React.FC = () => {
               <span className="detail__spec-label">Seats</span>
               <span className="detail__spec-value">{vehicle.seats}</span>
             </div>
-            <div className="detail__spec-item">
-              <span className="detail__spec-label">Horsepower</span>
-              <span className="detail__spec-value">{vehicle.horstpower}</span>
-            </div>
-            <div className="detail__spec-item">
-              <span className="detail__spec-label">Consumption</span>
-              <span className="detail__spec-value">
-                {vehicle.consumption}
-              </span>
-            </div>
           </div>
         </article>
 
-        {/* Right side card (booking summary) */}
+        {/* RIGHT */}
         <aside className="detail__side-card">
           <h2 className="detail__side-title">Rental Summary</h2>
           <p className="detail__side-text">
-            Prices may change depending on the length of the rental and the
-            price of your rental car.
+            Prices may change depending on the length of the rental and the price of your rental car.
           </p>
 
-          <div className="detail__side-car">
-            <div className="detail__side-car-info">
-              <div className="detail__side-car-name">
-                {vehicle.brand} {vehicle.model}
-              </div>
-              <div className="detail__side-car-type">
-                {vehicle.vehicletype}
-              </div>
+          {/* MAP */}
+          <div className="detail__side-map">
+            <MapContainer
+              center={mapCenter}
+              zoom={markers.length > 1 ? 6 : 7}
+              style={{ height: 200, width: "100%", borderRadius: 12 }}
+              scrollWheelZoom={false}
+            >
+              <TileLayer
+                attribution="&copy; OpenStreetMap contributors"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+
+              {markers.length === 0 ? (
+                <Marker position={mapCenter}>
+                  <Popup>No known locations for this car</Popup>
+                </Marker>
+              ) : (
+                markers.map((m) => (
+                  <Marker key={m.name} position={m.coords}>
+                    <Popup>{m.name}</Popup>
+                  </Marker>
+                ))
+              )}
+            </MapContainer>
+          </div>
+
+          <div className="detail__side-car-info">
+            <div className="detail__side-car-name">
+              {vehicle.brand} {vehicle.model}
             </div>
-            <div className="detail__side-car-price">
-              ${vehicle.priceperday}
-              <span>/ day</span>
-            </div>
+            <div className="detail__side-car-type">{vehicle.vehicletype}</div>
+          </div>
+
+          <div className="detail__side-car-price">
+            ${vehicle.priceperday}
+            <span>/ day</span>
           </div>
 
           <div className="detail__side-row">
             <span className="detail__side-label">Locations</span>
             <span className="detail__side-value">
-              {Array.isArray(vehicle.locations)
-                ? vehicle.locations.join(", ")
-                : vehicle.locations}
+              {locationNames.length ? locationNames.join(", ") : "—"}
             </span>
           </div>
 
-          <button
-            className="detail__side-button"
-            type="button"
-            onClick={() => navigate(`/checkout/${vehicle.id}`)}
-          >
-            Rent Now
-          </button>
+<button
+  className="detail__side-button"
+  type="button"
+  onClick={() =>
+    navigate(`/checkout/${vehicle.id}`, {
+      state: { availableLocations: vehicle.locations },
+    })
+  }
+>
+  Rent Now
+</button>
+
         </aside>
       </div>
     </section>
