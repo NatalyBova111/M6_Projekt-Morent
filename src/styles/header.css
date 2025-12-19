@@ -16,9 +16,8 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--color-primary-500);
-   text-decoration: none;  
+  text-decoration: none;
 }
-
 
 .header__nav {
   display: none;
@@ -36,12 +35,14 @@
   font-weight: 600;
 }
 
+/* Header actions */
 .header__actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
+/* Primary auth button (Login) */
 .header__login-btn {
   padding: 0.55rem 1.4rem;
   border-radius: 999px;
@@ -51,11 +52,53 @@
   font-weight: 600;
   background-color: var(--color-primary-500);
   color: var(--color-white);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
-/* Simple mobile menu icon placeholder */
-.header__menu-btn {
+.header__login-btn:hover {
+  opacity: 0.9;
+}
+
+/* Secondary auth button (Logout) — styled like "Rent now" but gray */
+.header__logout-btn {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: 85px;
+  height: 37px;
+
+  padding: 9px 16px;
+  border-radius: 4px;
+  border: none;
+
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  background-color: #e5e7eb;
+  color: #374151;
+
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.header__logout-btn:hover {
+  background-color: #d1d5db;
+}
+
+.header__logout-btn:active {
+  background-color: #cbd5e1;
+}
+
+.header__logout-btn:focus-visible {
+  outline: 2px solid #c7d2fe;
+  outline-offset: 2px;
+}
+
+/* Simple mobile menu icon placeholder (currently disabled) */
+.header__menu-btn {
+  display: none;
   align-items: center;
   justify-content: center;
   width: 36px;
@@ -107,11 +150,6 @@
 
 .top-search__input::placeholder {
   color: var(--color-text-muted);
-}
-.header__actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .header__icon-btn {

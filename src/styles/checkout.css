@@ -12,14 +12,14 @@
   align-items: flex-start;
 }
 
-/* левая колонка с формой */
+
 .checkout-column {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* карточки формы */
+
 .checkout-card {
   background-color: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -51,7 +51,6 @@
   color: var(--color-text-muted);
 }
 
-/* сетка полей */
 .checkout-card__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -62,7 +61,6 @@
   grid-column: 1 / -1;
 }
 
-/* отдельное поле */
 .checkout-field {
   display: flex;
   flex-direction: column;
@@ -91,7 +89,7 @@
   box-shadow: 0 0 0 1px rgba(53, 99, 233, 0.25);
 }
 
-/* подблоки Pick-Up / Drop-Off */
+/* Pick-Up / Drop-Off */
 .checkout-card__subsection {
   margin-top: 1.25rem;
 }
@@ -102,7 +100,7 @@
   font-weight: 600;
 }
 
-/* правая колонка - summary */
+/* summary */
 .checkout-summary__card {
   background-color: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -171,7 +169,6 @@
   font-weight: 700;
 }
 
-/* адаптив */
 @media (max-width: 900px) {
   .checkout-page__layout {
     grid-template-columns: minmax(0, 1fr);

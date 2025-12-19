@@ -59,6 +59,7 @@
   }
 }
 
+
 .hero-card {
   position: relative;
   overflow: hidden;
@@ -138,6 +139,71 @@
   right: 1.5rem;
 }
 
+
+/* Home hero — mobile: show only one banner */
+@media (max-width: 768px) {
+  .hero__grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide the second banner on mobile */
+  .hero-card--secondary {
+    display: none;
+  }
+}
+
+
+/* Home hero — mobile: prevent button overlapping the car image */
+@media (max-width: 768px) {
+  .hero-card {
+    min-height: 260px;
+    padding: 1.25rem 1.25rem 1.25rem;
+  }
+
+  .hero-card__content {
+    max-width: 100%;
+  }
+
+  .hero-card__button {
+    margin-top: 12px;
+  }
+
+  /* Make image smaller and keep it from covering content */
+  .hero-card__image {
+    height: 110px;
+    right: 1rem;
+    bottom: 0.75rem;
+    opacity: 0.95;
+  }
+
+  .hero-card__image--right {
+    height: 130px;
+    right: 1rem;
+    bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-card__content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-card__image {
+    z-index: 1;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 /* Home cars grid */
 .home-cars {
   margin-top: 2rem;
@@ -175,6 +241,8 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+
 
 /* Car card */
 .car-card {
@@ -272,4 +340,42 @@
 .car-card-link {
   text-decoration: none;
   color: inherit;
+}
+
+/* ===== Home cars grid — fix for Filter page responsiveness ===== */
+
+/* Mobile: 1 column */
+@media (max-width: 639px) {
+  .home-cars__grid.home-cars__grid--3 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .car-card {
+    padding: 0.9rem;
+    border-radius: 14px;
+  }
+
+  .car-card__image-wrapper {
+    min-height: 110px;
+  }
+
+  .car-card__button {
+    padding: 0.6rem 1.1rem;
+    border-radius: 10px;
+  }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .home-cars__grid.home-cars__grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Desktop: 3 columns  */
+@media (min-width: 1024px) {
+  .home-cars__grid.home-cars__grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

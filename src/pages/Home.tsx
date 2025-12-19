@@ -95,7 +95,13 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
                 Ease of doing a car rental safely and reliably. Of course at a
                 low price.
               </p>
-              <button className="hero-card__button">Rental Car</button>
+        <button
+          type="button"
+          className="hero-card__button hero-card__button--outline"
+          onClick={() => navigate("/filter")}
+        >
+          Rental Car
+        </button>
             </div>
             <img
               src={HERO_CAR_2}
@@ -114,9 +120,13 @@ const HomePage: React.FC<HomePageProps> = ({ searchTerm }) => {
                 Providing cheap car rental services and safe and comfortable
                 facilities.
               </p>
-              <button className="hero-card__button hero-card__button--outline">
-                Rental Car
-              </button>
+        <button
+          type="button"
+          className="hero-card__button hero-card__button--outline"
+          onClick={() => navigate("/filter")}
+        >
+          Rental Car
+        </button>
             </div>
             <img
               src={HERO_CAR_1}

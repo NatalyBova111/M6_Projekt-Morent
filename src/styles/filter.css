@@ -102,3 +102,85 @@
   width: 100%;
   accent-color: #3563e9;
 }
+
+
+
+/* ===============================
+   FILTER / LIST — MOBILE
+   =============================== */
+
+@media (max-width: 768px) {
+  .filter-page {
+    padding: 12px 0 24px;
+  }
+
+  /* Кнопка Filter на Home (если есть) */
+  .filter-button-wrapper {
+    justify-content: center;
+    margin: 12px 0;
+  }
+
+  .filter-button {
+    width: 100%;
+    max-width: 420px;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  /* Layout: вместо 2 колонок — одна */
+  .filter-page__layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Sidebar становится карточкой сверху */
+  .filter-sidebar {
+    padding: 14px 14px 6px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .filter-sidebar__title {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .filter-sidebar__group {
+    margin-bottom: 18px;
+  }
+
+  .filter-sidebar__options {
+    gap: 10px;
+  }
+
+  /* Опции — больше зона клика */
+  .filter-option {
+    padding: 6px 0;
+    font-size: 14px;
+  }
+
+  .filter-option input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .filter-option__count {
+    font-size: 12px;
+  }
+
+  /* Слайдер + подписи */
+  .filter-sidebar__price-row {
+    margin-bottom: 10px;
+  }
+
+  .filter-sidebar__price-label {
+    font-size: 13px;
+  }
+
+  .filter-sidebar__slider {
+    height: 4px;
+  }
+}
