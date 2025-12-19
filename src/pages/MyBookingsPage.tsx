@@ -133,13 +133,6 @@ const MyBookingsPage: React.FC = () => {
 
     <h1 className="my-bookings__title">My Bookings</h1>
 
-
-
-
-
-
-
-
         {normalizedItems.length === 0 ? (
           <p className="my-bookings__empty">No bookings yet.</p>
         ) : (

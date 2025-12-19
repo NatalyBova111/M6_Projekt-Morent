@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    // ✅ UX: возвращаем туда, откуда пришли (например, /checkout/:id)
+    // ✅ UX: redirect to the page user wanted to visit before login
     navigate(from, { replace: true });
   };
 

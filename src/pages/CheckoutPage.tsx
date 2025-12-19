@@ -47,6 +47,11 @@ const CheckoutPage: React.FC = () => {
   const [cardExp, setCardExp] = useState(""); // MM/YY
   const [cardCvc, setCardCvc] = useState("");
 
+    const [paypalEmail, setPaypalEmail] = useState("");
+  const [btcNetwork, setBtcNetwork] = useState<"BTC" | "Lightning">("BTC");
+  const [btcWallet, setBtcWallet] = useState("");
+
+
   // Step 4 — Confirmation
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreeMarketing, setAgreeMarketing] = useState(false);
@@ -103,12 +108,23 @@ const CheckoutPage: React.FC = () => {
   }, [billingName, billingPhone, billingAddress, billingCity]);
 
   const paymentReady = useMemo(() => {
-    if (paymentMethod !== "card") return true;
-    const digits = cardNumber.replace(/\s/g, "");
-    const expOk = /^\d{2}\/\d{2}$/.test(cardExp);
-    const cvcOk = /^\d{3,4}$/.test(cardCvc);
-    return digits.length >= 12 && expOk && cvcOk;
-  }, [paymentMethod, cardNumber, cardExp, cardCvc]);
+    if (paymentMethod === "card") {
+      const digits = cardNumber.replace(/\s/g, "");
+      const expOk = /^\d{2}\/\d{2}$/.test(cardExp);
+      const cvcOk = /^\d{3,4}$/.test(cardCvc);
+      return digits.length >= 12 && expOk && cvcOk;
+    }
+
+    if (paymentMethod === "paypal") {
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(paypalEmail.trim());
+      return emailOk;
+    }
+
+    // bitcoin
+    return btcWallet.trim().length >= 8;
+  }, [paymentMethod, cardNumber, cardExp, cardCvc, paypalEmail, btcWallet]);
+
+
 
   const canConfirm = useMemo(() => {
     return rentalReady && billingReady && paymentReady && agreeTerms && !submitting;
@@ -371,76 +387,163 @@ const CheckoutPage: React.FC = () => {
               <span className="checkout-card__step">Step 3 of 4</span>
             </header>
 
-            <div style={{ display: "grid", gap: 12 }}>
-              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentMethod === "card"}
-                  onChange={() => setPaymentMethod("card")}
-                />
-                Credit Card
+            <div className="pm__options">
+              {/* CARD */}
+              <label className={`pm__option ${paymentMethod === "card" ? "is-active" : ""}`}>
+                <div className="pm__left">
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === "card"}
+                    onChange={() => setPaymentMethod("card")}
+                  />
+                  <span className="pm__label">Credit Card</span>
+                </div>
+
+<div className="pm__logos" aria-hidden="true">
+  <img className="pm__img" src="/Container.png" alt="Visa & Mastercard" />
+</div>
+
               </label>
 
               {paymentMethod === "card" && (
-                <div className="checkout-card__grid">
-                  <div className="checkout-field checkout-field--full">
-                    <label className="checkout-field__label">Card Number</label>
-                    <input
-                      className="checkout-field__input"
-                      value={cardNumber}
-                      onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                      placeholder="1234 5678 9012 3456"
-                      inputMode="numeric"
-                    />
-                  </div>
+                <div className="pm__fields">
+                  <div className="checkout-card__grid">
+                    <div className="checkout-field checkout-field--full">
+                      <label className="checkout-field__label">Card Number</label>
+                      <input
+                        className="checkout-field__input"
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                        placeholder="1234 5678 9012 3456"
+                        inputMode="numeric"
+                      />
+                    </div>
 
-                  <div className="checkout-field">
-                    <label className="checkout-field__label">Expiration (MM/YY)</label>
-                    <input
-                      className="checkout-field__input"
-                      value={cardExp}
-                      onChange={(e) => setCardExp(e.target.value.slice(0, 5))}
-                      placeholder="MM/YY"
-                    />
-                  </div>
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Expiration (MM/YY)</label>
+                      <input
+                        className="checkout-field__input"
+                        value={cardExp}
+                        onChange={(e) => setCardExp(e.target.value.slice(0, 5))}
+                        placeholder="MM/YY"
+                      />
+                    </div>
 
-                  <div className="checkout-field">
-                    <label className="checkout-field__label">CVC</label>
-                    <input
-                      className="checkout-field__input"
-                      value={cardCvc}
-                      onChange={(e) =>
-                        setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))
-                      }
-                      placeholder="123"
-                      inputMode="numeric"
-                    />
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">CVC</label>
+                      <input
+                        className="checkout-field__input"
+                        value={cardCvc}
+                        onChange={(e) =>
+                          setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))
+                        }
+                        placeholder="123"
+                        inputMode="numeric"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentMethod === "paypal"}
-                  onChange={() => setPaymentMethod("paypal")}
-                />
-                PayPal
+              {/* PAYPAL */}
+              <label className={`pm__option ${paymentMethod === "paypal" ? "is-active" : ""}`}>
+                <div className="pm__left">
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === "paypal"}
+                    onChange={() => setPaymentMethod("paypal")}
+                  />
+                  <span className="pm__label">PayPal</span>
+                </div>
+
+<div className="pm__logos" aria-hidden="true">
+  <img className="pm__img" src="/PayPal.png" alt="PayPal" />
+</div>
+
               </label>
 
-              <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentMethod === "bitcoin"}
-                  onChange={() => setPaymentMethod("bitcoin")}
-                />
-                Bitcoin
+              {paymentMethod === "paypal" && (
+                <div className="pm__fields">
+                  <div className="checkout-field checkout-field--full">
+                    <label className="checkout-field__label">PayPal Email</label>
+                    <input
+                      className="checkout-field__input"
+                      value={paypalEmail}
+                      onChange={(e) => setPaypalEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      inputMode="email"
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <p className="pm__hint">
+                    We’ll redirect you to PayPal after confirming the booking.
+                  </p>
+                </div>
+              )}
+
+              {/* BITCOIN */}
+              <label className={`pm__option ${paymentMethod === "bitcoin" ? "is-active" : ""}`}>
+                <div className="pm__left">
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === "bitcoin"}
+                    onChange={() => setPaymentMethod("bitcoin")}
+                  />
+                  <span className="pm__label">Bitcoin</span>
+                </div>
+
+ <div className="pm__logos" aria-hidden="true">
+  <img className="pm__img" src="/Bitcoin.png" alt="Bitcoin" />
+</div>
+
               </label>
+
+              {paymentMethod === "bitcoin" && (
+                <div className="pm__fields">
+                  <div className="checkout-card__grid">
+                    <div className="checkout-field">
+                      <label className="checkout-field__label">Network</label>
+                      <select
+                        className="checkout-field__input"
+                        value={btcNetwork}
+                        onChange={(e) => setBtcNetwork(e.target.value as "BTC" | "Lightning")}
+                      >
+                        <option value="BTC">Bitcoin (On-chain)</option>
+                        <option value="Lightning">Lightning</option>
+                      </select>
+                    </div>
+
+                    <div className="checkout-field checkout-field--full">
+                      <label className="checkout-field__label">
+                        {btcNetwork === "Lightning" ? "Lightning Invoice" : "Wallet Address"}
+                      </label>
+                      <input
+                        className="checkout-field__input"
+                        value={btcWallet}
+                        onChange={(e) => setBtcWallet(e.target.value)}
+                        placeholder={btcNetwork === "Lightning" ? "lnbc1..." : "bc1q..."}
+                        autoComplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="pm__hint">
+                    After confirmation we’ll show you the payment details/invoice.
+                  </p>
+                </div>
+              )}
             </div>
           </article>
+
+
+
+
+
+
 
           {/* Step 4 — Confirmation */}
           <article className="checkout-card">

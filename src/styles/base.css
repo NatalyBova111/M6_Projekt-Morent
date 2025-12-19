@@ -74,3 +74,24 @@ body {
   color: #b91c1c;
   font-size: 0.9rem;
 }
+
+.pm__options { display: grid; gap: 12px; }
+
+.pm__option{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 16px; border-radius:12px;
+  background:#f5f7fb; cursor:pointer; border:1px solid transparent;
+}
+.pm__option.is-active{ background:#eef3ff; border-color:#d7e3ff; }
+
+.pm__left{ display:flex; align-items:center; gap:12px; }
+.pm__label{ font-size:16px; font-weight:600; }
+
+.pm__logos{ display:flex; align-items:center; gap:10px; }
+.pm__logo{ font-weight:700; font-size:14px; opacity:.9; }
+
+.pm__fields{
+  background:#fff; border:1px solid #edf0f7; border-radius:12px;
+  padding:14px 16px; margin-top:-6px;
+}
+.pm__hint{ margin:10px 0 0; font-size:13px; color:#7b8794; }
