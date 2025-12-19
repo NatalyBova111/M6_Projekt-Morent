@@ -203,7 +203,13 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
+
+// Notify header that bookings list changed
+window.dispatchEvent(new Event("morent:bookings-updated"));
+
+
     setSubmitSuccess("Booking created successfully!");
+
     setTimeout(() => navigate("/my-bookings", { replace: true }), 700);
   };
 

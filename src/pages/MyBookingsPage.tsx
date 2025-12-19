@@ -4,7 +4,6 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/useAuth";
 import { Link } from "react-router-dom";
 
-
 type VehicleShort = {
   id: string;
   brand: string;
@@ -54,6 +53,9 @@ const MyBookingsPage: React.FC = () => {
 
     setItems((prev) => prev.filter((b) => b.id !== bookingId));
     setCancelingId(null);
+
+    // Notify the header to refresh the bookings dot state
+    window.dispatchEvent(new Event("morent:bookings-updated"));
   };
 
   useEffect(() => {
@@ -61,6 +63,9 @@ const MyBookingsPage: React.FC = () => {
       if (!user) {
         setItems([]);
         setLoading(false);
+
+        // Notify the header (no user => no bookings)
+        window.dispatchEvent(new Event("morent:bookings-updated"));
         return;
       }
 
@@ -102,6 +107,9 @@ const MyBookingsPage: React.FC = () => {
       }
 
       setLoading(false);
+
+      // Notify the header to refresh the bookings dot state
+      window.dispatchEvent(new Event("morent:bookings-updated"));
     };
 
     load();
@@ -109,10 +117,7 @@ const MyBookingsPage: React.FC = () => {
 
   const normalizedItems = useMemo(() => {
     return items.map((b) => {
-      const car = Array.isArray(b.vehicles)
-        ? b.vehicles[0] ?? null
-        : b.vehicles ?? null;
-
+      const car = Array.isArray(b.vehicles) ? b.vehicles[0] ?? null : b.vehicles ?? null;
       return { booking: b, car };
     });
   }, [items]);
@@ -121,17 +126,13 @@ const MyBookingsPage: React.FC = () => {
   if (error) return <p className="error">Failed to load bookings: {error}</p>;
 
   return (
+    <section className="my-bookings">
+      <div className="my-bookings__container">
+        <Link to="/" className="detail__back" style={{ marginBottom: 16 }}>
+          ← Back to Home
+        </Link>
 
-
-
-<section className="my-bookings">
-  <div className="my-bookings__container">
-
-    <Link to="/" className="detail__back" style={{ marginBottom: 16 }}>
-      ← Back to Home
-    </Link>
-
-    <h1 className="my-bookings__title">My Bookings</h1>
+        <h1 className="my-bookings__title">My Bookings</h1>
 
         {normalizedItems.length === 0 ? (
           <p className="my-bookings__empty">No bookings yet.</p>
@@ -155,9 +156,7 @@ const MyBookingsPage: React.FC = () => {
                     <div className="my-bookings__car-name">
                       {car ? `${car.brand} ${car.model}` : "Car"}
                     </div>
-                    <div className="my-bookings__car-type">
-                      {car?.vehicletype ?? ""}
-                    </div>
+                    <div className="my-bookings__car-type">{car?.vehicletype ?? ""}</div>
                   </div>
 
                   <div className="my-bookings__price">
@@ -207,4 +206,3 @@ const MyBookingsPage: React.FC = () => {
 };
 
 export default MyBookingsPage;
-

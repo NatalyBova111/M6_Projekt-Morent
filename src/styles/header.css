@@ -183,3 +183,28 @@
   height: 36px;
   border-radius: 50%;
 }
+
+
+/* Notification dot on the bell icon */
+.header__icon-btn--bell {
+  position: relative;
+}
+
+.header__badge-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ef4444;
+  border: 2px solid #ffffff;
+}
+.header__avatar-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
